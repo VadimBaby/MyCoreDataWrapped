@@ -1,6 +1,6 @@
 import CoreData
 
-public class CoreDataStorage: CoreDataStore, CoreDataFetcher {
+public class CoreDataStorage {
     public init() {}
     
     private var isSetup = false
