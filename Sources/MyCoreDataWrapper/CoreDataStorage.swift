@@ -1,6 +1,23 @@
 import CoreData
+import Foundation
 
-public class CoreDataStorage {
+public protocol CoreDataStorageProtocol: AnyObject {
+    func setup(model: String, bundle: AnyClass)
+    func delete<Entity: NSManagedObject>(entity: Entity) throws
+    func create<Entity: NSManagedObject>(type: Entity.Type, configure: (Entity) -> Void) throws
+    func update<Entity: NSManagedObject>(entity: Entity, configure: (Entity) -> Void) throws
+    func fetch<Entity: NSManagedObject>(type: Entity.Type) throws -> [Entity]
+    func fetch<Entity: NSManagedObject>(
+        type: Entity.Type,
+        configureRequest: (NSFetchRequest<Entity>) -> Void
+    ) throws -> [Entity]
+    func fetch<Entity: NSManagedObject, T: CVarArg>(by id: T, type: Entity.Type) throws -> Entity?
+    func fetch<Entity: NSManagedObject>(by date: Date, type: Entity.Type) throws -> Entity?
+    func fetch<Entity: NSManagedObject, T>(by ids: [T], type: Entity.Type) throws -> [Entity]
+    func fetch<Entity: NSManagedObject>(by id: UUID, type: Entity.Type) throws -> Entity?
+}
+
+public class CoreDataStorage: CoreDataStorageProtocol {
     public init() {}
     
     private var isSetup = false
@@ -62,17 +79,21 @@ public extension CoreDataStorage {
         }.first
     }
     
-    func fetch<Entity: NSManagedObject, T: CVarArg>(by ids: [T], type: Entity.Type) throws -> [Entity] {
+    func fetch<Entity: NSManagedObject, T>(by ids: [T], type: Entity.Type) throws -> [Entity] {
         try fetch(type: type) { request in
             request.predicate = NSPredicate(format: "id IN %@", ids)
         }
+    }
+    
+    func fetch<Entity: NSManagedObject>(by id: UUID, type: Entity.Type) throws -> Entity? {
+        let cVarArgId = id as CVarArg
+        return try fetch(by: cVarArgId, type: type)
     }
 }
 
 // MARK: - Private Methods
 
 private extension CoreDataStorage {
-    // swiftlint:disable:next generic_constraint_naming
     func createFetchRequest<Entity: NSManagedObject>(for type: Entity.Type) -> NSFetchRequest<Entity> {
         return NSFetchRequest(entityName: "\(Entity.self)")
     }
