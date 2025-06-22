@@ -7,9 +7,7 @@ final class PersistenceStore {
         container.viewContext
     }
     
-    public init(model: String, for bundle: AnyClass) {
-        let bundle = Bundle(for: bundle)
-        
+    public init(model: String, for bundle: Bundle) {
         guard let modelURL = bundle.url(forResource: model, withExtension: "momd") else {
             fatalError("Failed to find model \(model) in bundle")
         }

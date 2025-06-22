@@ -1,34 +1,11 @@
 import CoreData
 import Foundation
 
-public protocol CoreDataStorageProtocol: AnyObject {
-    func setup(model: String, bundle: AnyClass)
-    func delete<Entity: NSManagedObject>(entity: Entity) throws
-    func create<Entity: NSManagedObject>(type: Entity.Type, configure: (Entity) -> Void) throws
-    func update<Entity: NSManagedObject>(entity: Entity, configure: (Entity) -> Void) throws
-    func fetch<Entity: NSManagedObject>(type: Entity.Type) throws -> [Entity]
-    func fetch<Entity: NSManagedObject>(
-        type: Entity.Type,
-        configureRequest: (NSFetchRequest<Entity>) -> Void
-    ) throws -> [Entity]
-    func fetch<Entity: NSManagedObject, T: CVarArg>(by id: T, type: Entity.Type) throws -> Entity?
-    func fetch<Entity: NSManagedObject>(by date: Date, type: Entity.Type) throws -> Entity?
-    func fetch<Entity: NSManagedObject, T>(by ids: [T], type: Entity.Type) throws -> [Entity]
-    func fetch<Entity: NSManagedObject>(by id: UUID, type: Entity.Type) throws -> Entity?
-}
-
-public class CoreDataStorage: CoreDataStorageProtocol {
-    public init() {}
+public class CoreDataStorage {
+    private let store: PersistenceStore
     
-    private var isSetup = false
-    
-    private var store: PersistenceStore!
-    
-    public func setup(model: String, bundle: AnyClass) {
-        guard !isSetup else { return }
-        
-        store = PersistenceStore(model: model, for: bundle)
-        isSetup = true
+    public init(model: String, bundle: Bundle) {
+        self.store = .init(model: model, for: bundle)
     }
     
     public func delete<Entity: NSManagedObject>(entity: Entity) throws {
